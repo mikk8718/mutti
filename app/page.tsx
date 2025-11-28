@@ -1,65 +1,146 @@
-import Image from "next/image";
+"use client";
+
+import { useState, Fragment } from "react";
+import Product from "./components/card";
+import { send } from "process";
+
+type CartItem = {
+  id: number;
+  name: string;
+  quantity: number;
+  note?: string; // size, color, text, etc
+};
 
 export default function Home() {
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [phone, setPhone] = useState("");
+
+
+  const cartText = cart
+  .map(
+    (item) =>
+      `• ${item.name} (ID: ${item.id})\n  Quantity: ${item.quantity}${
+        item.note ? `\n  Note: ${item.note}` : ""
+      }`
+  )
+  .join("\n\n");
+
+   const sendEmail = async () => {
+  try {
+    const res = await fetch("/api/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cart }), // send cart here
+    });
+
+    const data = await res.json();
+  } catch (err) {
+  }
+};
+
+  const addToCart = (item: CartItem) => {
+    setCart(prev => {
+      const exists = prev.find(p => p.id === item.id);
+      if (exists) {
+        return prev.map(p =>
+          p.id === item.id ? { ...p, quantity: p.quantity + item.quantity } : p
+        );
+      }
+      return [...prev, item];
+    });
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <Fragment>
+      <Product addToCart={addToCart} />
+
+      <div className="fixed bottom-6 right-6 w-72 rounded-lg border bg-white p-4 shadow">
+        <h3 className="font-bold mb-2">Kurv</h3>
+
+        {cart.length === 0 && (
+          <p className="text-sm text-gray-500">Ingen varer endnu</p>
+        )}
+
+        {cart.map(item => (
+          <div key={item.id} className="flex justify-between text-sm">
+            <span>{item.name} x {item.quantity}</span>
+          </div>
+        ))}
+
+        {cart.length > 0 && (
+          <button
+            onClick={() => setShowCheckout(true)}
+            className="mt-3 w-full rounded bg-black py-2 text-white"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Gå til checkout
+          </button>
+
+        )}
+      </div>
+
+      {showCheckout && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
+          <div className="bg-white w-full max-w-lg rounded-lg p-6 space-y-4">
+            <h2 className="text-xl font-bold">Bestilling</h2>
+
+            {cart.map((item, index) => (
+              <div key={item.id} className="border-b pb-2">
+                <p className="font-semibold">
+                  {item.name} x {item.quantity}
+                </p>
+
+                <input
+                  placeholder="Fx størrelse, farve, tekst..."
+                  className="mt-2 w-full rounded border px-2 py-1"
+                  value={item.note || ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setCart(prev =>
+                      prev.map((p, i) =>
+                        i === index ? { ...p, note: value } : p
+                      )
+                    );
+                  }}
+                />
+              </div>
+            ))}
+
+            <div>
+              <label className="block text-sm font-medium">Telefonnummer</label>
+              <input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="fx 12345678"
+                className="mt-1 w-full rounded border px-2 py-1"
+              />
+            </div>
+            <div>Jeg vender tilbage over SMS så snart jeg får tid!</div>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowCheckout(false)}
+                className="border px-4 py-1 rounded"
+              >
+                Annuller
+              </button>
+
+              <button
+                onClick={() => {
+                  console.log("ORDER:", { cart, phone });
+                  setCart([]);
+                  setPhone("");
+                  setShowCheckout(false);
+                  sendEmail();
+                }}
+                className="bg-black text-white px-4 py-1 rounded"
+              >
+                Send bestilling
+              </button>
+            </div>
+          </div>
         </div>
-      </main>
-    </div>
+      )}
+
+    </Fragment>
   );
 }
