@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 
 export async function POST(req: Request) {
   try {
+
     const body = await req.json();
     const cart: {
       id: number;
@@ -10,15 +11,15 @@ export async function POST(req: Request) {
       note?: string;
     }[] = body.cart;
 
-    // Format cart for email
+    const phone: string = body.phone; // grab phone number from request
     const cartText = cart
       .map(
         (item) =>
           `• ${item.name} (ID: ${item.id})\n  Quantity: ${item.quantity}${
-            item.note ? `\n  Note: ${item.note}` : ""
+            item.note ? `\n  Note: ${item.note}` : "" 
           }`
       )
-      .join("\n\n");
+      .join("\n\n" + `${phone}`);
 
     const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
@@ -35,7 +36,7 @@ export async function POST(req: Request) {
       to: `${process.env.EMAIL_USER}`,
       subject: "New Order Received",
       text: `You have a new order:\n\n${cartText}`,
-      html: `<p>You have a new order:</p><pre>${cartText}</pre>`,
+      html: `<p>You have a new order:</p><pre>${cartText}</pre> \n ${phone}`,
     });
 
     return new Response(JSON.stringify({ message: "Email sent!" }), {

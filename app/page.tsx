@@ -16,7 +16,6 @@ export default function Home() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [phone, setPhone] = useState("");
 
-
   const cartText = cart
   .map(
     (item) =>
@@ -31,7 +30,7 @@ export default function Home() {
     const res = await fetch("/api/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cart }), // send cart here
+      body: JSON.stringify({ cart, phone }), // send cart here
     });
 
     const data = await res.json();
@@ -108,12 +107,13 @@ export default function Home() {
 
             <div>
               <label className="block text-sm font-medium">Telefonnummer</label>
-              <input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="fx 12345678"
-                className="mt-1 w-full rounded border px-2 py-1"
-              />
+            <input
+  value={phone}
+  onChange={(e) => setPhone(e.target.value)}
+  placeholder="fx 12345678"
+  className="mt-1 w-full rounded border px-2 py-1"
+/>
+
             </div>
             <div>Jeg vender tilbage over SMS så snart jeg får tid!</div>
             <div className="flex justify-end gap-3">
@@ -126,9 +126,12 @@ export default function Home() {
 
               <button
                 onClick={() => {
-                  console.log("ORDER:", { cart, phone });
+                  if (!phone || !/^\d{8}$/.test(phone)) {
+  alert("Indtast et gyldigt telefonnummer (8 cifre)!");
+  return; // stop sending if invalid
+}
                   setCart([]);
-                  setPhone("");
+                  setPhone(phone);
                   setShowCheckout(false);
                   sendEmail();
                 }}
