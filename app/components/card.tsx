@@ -99,13 +99,13 @@ export default function Product({ addToCart }: ProductProps) {
     <div className="pb-32 bg-white">
       <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">
-          Mit navn er Bodil, og her er et lille galleri af håndlavede ting som laver på bestilling.
+          Mit navn er Bodil, og her er et lille galleri af håndlavede ting som jeg laver på bestilling.
         </h2>
         <h2 className="text-xl tracking-tight text-gray-900 s:my-2">
           Derudover laver jeg alt lige fra tæpper til trøjer både i hækling og strik.
         </h2>
         <h2 className="italic my-2 text-xl font-bold tracking-tight text-gray-900">
-          Alle bestillinger foregår over SMS, og du kan igennem denne side skrive en besked til mig.
+          Alle bestillinger foregår over SMS, og du kan igennem denne side skrive en besked til mig eller ræk ud på 60128531.
         </h2>
 
         <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
