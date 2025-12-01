@@ -22,7 +22,8 @@ const products = [
     name: '2 stk. Grydelapper',
     href: '#',
     images: [
-      '/images/klud_blå.jpeg'
+      '/images/klud_blå.jpeg',
+      '/images/klude.jpeg',
     ],
     imageAlt: 'Strikket klud',
     price: '100 DDK',
